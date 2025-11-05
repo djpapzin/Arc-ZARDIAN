@@ -1,23 +1,37 @@
-# Arc ZARDIAN: Project Scaffolding & AI Collaboration Guide
+# Arc ZARDIAN: Project Guide
 
 ## Overview
-This guide provides a complete framework for developing Arc ZARDIAN using AI coding assistants (Windsurf, GitHub Copilot, or Claude). It includes project structure, coding standards, technology stack recommendations, and a master prompt for consistent AI collaboration.
+This guide provides comprehensive documentation for the Arc ZARDIAN project, including project structure, development setup, coding standards, and contribution guidelines.
 
----
+## Project Structure
 
-## 1. Recommended Project Structure
-
+```text
+Arc-ZARDIAN/
+├── .github/               # GitHub workflows and templates
+├── docs/                  # Project documentation
+│   ├── ai_prompting_examples.md
+│   ├── arc_zardian_guide.md
+│   ├── copilot_instructions.md
+│   ├── current_status.md
+│   ├── getting_started.md
+│   ├── implementation_roadmap.md
+│   └── quick_reference.md
+├── src/                   # Source code
+│   └── arc_zardian/       # Main package
+│       ├── core/          # Core functionality
+│       │   ├── __init__.py
+│       │   ├── optimizer.py  # Conversion path optimization logic
+│       │   └── models.py     # Data models
+│       ├── __init__.py
+│       └── app.py         # Streamlit web application
+├── tests/                 # Test suite
+│   ├── test_presentation/ # UI/Integration tests
+│   └── test_core/         # Unit tests
+├── .env.example          # Example environment variables
+├── .gitignore
+├── pyproject.toml        # Project metadata and build configuration
+└── requirements.txt      # Project dependencies
 ```
-arc_zardian/
-├── .github/
-│   └── copilot-instructions.md          # GitHub Copilot custom instructions
-├── .gitignore                            # Exclude .env, __pycache__, etc.
-├── .env.example                          # Template for environment variables
-├── pyproject.toml                        # Project metadata and dependencies
-├── requirements.txt                      # Pinned dependency versions
-├── README.md                             # Project overview and usage
-├── LICENSE                               # Choose appropriate license
-│
 ├── src/
 │   └── arc_zardian/                      # Main package
 │       ├── __init__.py                   # Package initialization
@@ -329,6 +343,7 @@ python-json-logger==2.0.7 # Structured JSON logging
 - **aiohttp**: Enables concurrent API calls without threading complexity
 - **python-dotenv**: Secure credential management via `.env` files
 - **click**: Lightweight CLI framework, minimal boilerplate
+- **streamlit**: Web application framework for interactive UI
 - **pydantic**: Type-safe data validation using Python types
 - **pytest**: Industry standard testing framework
 - **python-json-logger**: Structured logging for easier debugging and monitoring
