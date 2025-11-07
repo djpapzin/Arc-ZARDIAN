@@ -1,9 +1,11 @@
 import streamlit as st
 from typing import Dict
 import asyncio
+import os
 
 from arc_zardian.core.optimizer import ConversionOptimizer, Exchange
 from arc_zardian.core.models import ConversionPath, ConversionResult
+from arc_zardian.api.arc_client import send_usdc_on_arc
 
 # Set page config
 st.set_page_config(
@@ -109,12 +111,99 @@ if st.button("🚀 Find Best Conversion"):
                     "Actual conversion may vary based on market conditions and exchange policies.*"
                 )
                 
+                # Store the best conversion result in session state for payment section
+                st.session_state.last_conversion = {
+                    'usdc_amount': best.usdc_received,
+                    'zar_amount': zar_amount
+                }
+                
             except Exception as e:
                 st.error(f"An error occurred while processing your request: {str(e)}")
                 st.error("Please try again later or check your internet connection.")
                 
                 # Log the error for debugging
                 st.exception("Error details:")
+
+# ============================================================================
+# PAYMENT SECTION - Send USDC on Arc Blockchain
+# ============================================================================
+st.markdown("---")
+st.markdown("## 💳 Send USDC on Arc Blockchain")
+st.markdown("Transfer your acquired USDC to another address on the Arc network.")
+
+# Create two columns for payment inputs
+payment_col1, payment_col2 = st.columns(2)
+
+with payment_col1:
+    recipient_address = st.text_input(
+        "Recipient's Arc Address",
+        placeholder="0x...",
+        help="Enter the recipient's Ethereum-compatible address on Arc network"
+    )
+
+with payment_col2:
+    # Get the last conversion amount if available, otherwise default to 0
+    default_usdc = 0.0
+    if hasattr(st.session_state, 'last_conversion'):
+        default_usdc = st.session_state.last_conversion.get('usdc_amount', 0.0)
+    
+    usdc_amount = st.number_input(
+        "USDC Amount to Send",
+        min_value=0.01,
+        value=default_usdc if default_usdc > 0 else 1.0,
+        step=0.01,
+        format="%.2f",
+        help="Amount of USDC to transfer to the recipient"
+    )
+
+# Payment button
+if st.button("🚀 Send Payment on Arc", key="send_payment_button"):
+    # Validate inputs
+    if not recipient_address:
+        st.error("❌ Please enter a recipient address")
+    elif not recipient_address.startswith("0x") or len(recipient_address) != 42:
+        st.error("❌ Invalid Arc address format. Must be 42 characters starting with '0x'")
+    elif usdc_amount <= 0:
+        st.error("❌ Please enter a positive USDC amount")
+    else:
+        with st.spinner("Processing payment on Arc network..."):
+            try:
+                # WARNING: For hackathon demo purposes only. Do not use in production.
+                # This is a hardcoded demo private key - NEVER use in production!
+                sender_private_key = os.getenv(
+                    "ARC_DEMO_PRIVATE_KEY",
+                    "0x1234567890123456789012345678901234567890123456789012345678901234"
+                )
+                
+                # Send USDC on Arc
+                success, tx_hash_or_error = send_usdc_on_arc(
+                    sender_private_key=sender_private_key,
+                    recipient_address=recipient_address,
+                    amount=usdc_amount
+                )
+                
+                if success:
+                    # Display success message with block explorer link
+                    st.success(f"✅ Payment sent successfully!")
+                    st.markdown(
+                        f"**Transaction Hash:** `{tx_hash_or_error}`\n\n"
+                        f"[View on Arc Block Explorer](https://testnet.arcscan.io/tx/{tx_hash_or_error})"
+                    )
+                    st.balloons()
+                else:
+                    # Display error message
+                    st.error(f"❌ Payment failed: {tx_hash_or_error}")
+                    
+            except Exception as e:
+                st.error(f"❌ An error occurred while processing the payment: {str(e)}")
+                st.exception("Error details:")
+
+# Payment section disclaimer
+st.markdown("---")
+st.warning(
+    "⚠️ **Demo Notice:** This payment feature uses a hardcoded demo private key for hackathon purposes. "
+    "**Never use this in production.** Always use secure key management for real transactions."
+)
 
 # Add some spacing at the bottom
 st.markdown("---")
